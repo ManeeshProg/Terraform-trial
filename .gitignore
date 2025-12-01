@@ -1,1 +1,10 @@
 terraform_use_id.txt
+*.hcl
+/01/.terraform
+01/terraform.tfstate.backup
+01/terraform.tfstate
+/02/.terraform
+/02/aws_backend/.terraform
+02/aws_backend/terraform.tfstate
+02/terraform.tfstate
+02/terraform.tfstate.backup
