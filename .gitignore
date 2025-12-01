@@ -8,3 +8,4 @@ terraform_use_id.txt
 02/aws_backend/terraform.tfstate
 02/terraform.tfstate
 02/terraform.tfstate.backup
+02/aws_backend/terraform.tfstate.backup
