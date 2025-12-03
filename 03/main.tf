@@ -52,14 +52,14 @@ resource "aws_subnet" "private_SN" {
     for_each = {
         a={
             az="ap-south-1a"
-            cidr="10.0.0.0/24"
+            cidr="10.0.3.0/24"
         }
         b={
             az="ap-south-1b"
-            cidr="10.0.1.0/24"            
+            cidr="10.0.4.0/24"            
         }
     }
-    vpc_id = aws_vpc.Test_VPC
+    vpc_id = aws_vpc.Test_VPC.id
     cidr_block = each.value.cidr
     availability_zone = each.value.az
     tags = {
@@ -95,7 +95,7 @@ resource "aws_eip" "nat_eip" {
 
 resource "aws_nat_gateway" "nat" {
     allocation_id = aws_eip.nat_eip.id
-    subnet_id = aws.subnet.public_SN["a"].id
+    subnet_id = aws_subnet.public_SN["a"].id
     tags = {
         Name = "Learning_NAT_GW"
     }
@@ -104,7 +104,7 @@ resource "aws_nat_gateway" "nat" {
 
 resource "aws_route_table" "Learning_Private_RT" {
     vpc_id = aws_vpc.Test_VPC.id
-    route = {
+    route  {
         cidr_block = "10.0.0.0/24"
         nat_gateway_id = aws_nat_gateway.nat.id
     }
@@ -124,14 +124,14 @@ resource "aws_security_group" "public_SG" {
     name = "Learning_Public_SG"
     description = "Allow SSH and HTTP inbound traffic"
 
-    ingress = {
+    ingress {
         description = "SSH from anywhere"
         from_port = 22
         to_port = 22
         protocol = "tcp"
         cidr_blocks = ["0.0.0.0/0"]
     }
-    egress = {
+    egress  {
         from_port = 0
         to_port = 0
         protocol = "-1"
@@ -147,14 +147,14 @@ resource "aws_security_group" "private_SG" {
     name = "Learning_Private_SG"
     description = "Allow HTTP from Public_SG"
 
-    ingress = {
+    ingress  {
         description = "SSh from public_SG"
         from_port = 22
         to_port = 22
         protocol = "tcp"
         security_groups= [aws_security_group.public_SG.id]
 }
-    egress = {
+    egress  {
         from_port = 0
         to_port = 0
         protocol = "-1"
@@ -180,12 +180,12 @@ resource "aws_instance" "public" {
     }
 }
 resource "aws_instance" "private" {
-  for_each = aws_subnet.private
+  for_each = aws_subnet.private_SN
 
   ami                    = "ami-02b8269d5e85954ef"
   instance_type          = "t2.nano"
   subnet_id              = each.value.id
-  vpc_security_group_ids = [aws_security_group.private_sg.id]
+  vpc_security_group_ids = [aws_security_group.private_SG.id]
   key_name               = var.key_name
 
   tags = {
